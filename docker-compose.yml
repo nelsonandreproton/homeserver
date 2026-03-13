@@ -1,0 +1,83 @@
+services:
+
+  # ── CNCSearch web UI ────────────────────────────────────────────────────────
+  cncsearch:
+    build:
+      context: ../CNCSearch
+      dockerfile: Dockerfile
+    container_name: cncsearch
+    restart: unless-stopped
+    env_file: ../CNCSearch/.env
+    volumes:
+      - cncsearch_data:/data
+    expose:
+      - "8080"
+
+  # ── HTTPS reverse proxy (Caddy) ─────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: cncsearch_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      # Set to: YOUR-IP-WITH-DASHES.sslip.io  (e.g. 1-2-3-4.sslip.io)
+      CADDY_HOST: ${CADDY_HOST}
+    volumes:
+      - ../CNCSearch/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - cncsearch
+
+  # ── GarminBot ────────────────────────────────────────────────────────────────
+  # pid:host + network_mode:host so HetznerCheck collectors see real host metrics.
+  garminbot:
+    build:
+      context: ../GarminBot
+      dockerfile: Dockerfile
+    container_name: garminbot
+    restart: unless-stopped
+    pid: "host"             # real process/zombie count for /server_status
+    network_mode: "host"    # real network stats; GarminBot only needs internet access
+    env_file: ../GarminBot/.env
+    environment:
+      PYTHONPATH: /cncsearch:/hetznercheck
+      CNCSEARCH_DATABASE_PATH: /cncsearch_data/cncsearch.db
+      CNCSEARCH_EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-jina}
+      CNCSEARCH_JINA_API_KEY: ${JINA_API_KEY}
+      HETZNERCHECK_CONFIG_PATH: /hetznercheck/config.yml
+    volumes:
+      - garminbot_data:/app/data
+      - cncsearch_data:/cncsearch_data              # shared DB with cncsearch
+      - ../CNCSearch:/cncsearch:ro                  # /canticos handler source
+      - ../HetznerCheck:/hetznercheck:ro            # /server_status handler source
+      - /:/rootfs:ro                                # host filesystem for disk stats
+      - /var/log:/var/log:ro                        # auth.log for SSH failure count
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for container list
+
+  # ── HetznerCheck monitor ─────────────────────────────────────────────────────
+  hetzner-monitor:
+    build:
+      context: ../HetznerCheck
+      dockerfile: Dockerfile
+    container_name: hetzner-monitor
+    restart: unless-stopped
+    pid: "host"
+    network_mode: "host"
+    env_file: ../HetznerCheck/.env
+    environment:
+      - TZ=Europe/Lisbon
+    volumes:
+      - /:/rootfs:ro
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../HetznerCheck/config.yml:/app/config.yml:ro
+
+volumes:
+  cncsearch_data:
+  garminbot_data:
+  caddy_data:
+  caddy_config:
