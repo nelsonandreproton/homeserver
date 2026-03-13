@@ -42,6 +42,8 @@ services:
     restart: unless-stopped
     pid: "host"             # real process/zombie count for /server_status
     network_mode: "host"    # real network stats; GarminBot only needs internet access
+    group_add:
+      - "${DOCKER_GID:-999}"  # docker group GID for socket access (getent group docker)
     env_file: ../GarminBot/.env
     environment:
       PYTHONPATH: /cncsearch:/hetznercheck
@@ -67,6 +69,8 @@ services:
     restart: unless-stopped
     pid: "host"
     network_mode: "host"
+    group_add:
+      - "${DOCKER_GID:-999}"  # docker group GID for socket access
     env_file: ../HetznerCheck/.env
     environment:
       - TZ=Europe/Lisbon

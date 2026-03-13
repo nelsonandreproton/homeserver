@@ -54,6 +54,7 @@ Editar `.env`:
 | Variável | Descrição |
 |---|---|
 | `CADDY_HOST` | IP do servidor com traços + `.sslip.io` — ex: `1-2-3-4.sslip.io` |
+| `DOCKER_GID` | GID do grupo `docker` no host: `getent group docker \| cut -d: -f3` |
 | `EMBEDDING_PROVIDER` | `jina` (padrão) ou `local` |
 | `JINA_API_KEY` | Chave da API Jina AI (conta gratuita em [jina.ai](https://jina.ai)) |
 
