@@ -9,12 +9,20 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Hard-reset a repo to match the remote (no local changes should live on the server)
+_sync() {
+  local dir="$1"
+  echo "  Syncing $dir..."
+  git -C "$dir" fetch origin
+  git -C "$dir" reset --hard origin/main
+}
+
 echo "=== Homeserver Full Deploy ==="
 
-echo "[1/3] Pulling all repos..."
-git -C ../CNCSearch pull
-git -C ../GarminBot pull
-git -C ../HetznerCheck pull
+echo "[1/3] Syncing all repos to origin/main..."
+_sync ../CNCSearch
+_sync ../GarminBot
+_sync ../HetznerCheck
 
 echo "[2/3] Rebuilding and restarting all services..."
 docker compose up -d --build
