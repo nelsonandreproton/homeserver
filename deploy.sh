@@ -43,6 +43,7 @@ _wait_healthy() {
 echo "=== Homeserver Full Deploy ==="
 
 echo "[1/3] Syncing all repos to origin/main..."
+_sync .
 _sync ../CNCSearch
 _sync ../GarminBot
 _sync ../HetznerCheck
