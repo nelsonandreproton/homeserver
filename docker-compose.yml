@@ -53,7 +53,7 @@ services:
       HETZNERCHECK_CONFIG_PATH: /hetznercheck/config.yml
       HEALTH_PORT: "8080"
     volumes:
-      - garminbot_data:/app/data
+      - ../GarminBot/data:/app/data
       - cncsearch_data:/cncsearch_data              # shared DB with cncsearch
       - ../CNCSearch:/cncsearch:ro                  # /canticos handler source
       - ../HetznerCheck:/hetznercheck:ro            # /server_status handler source
@@ -83,6 +83,5 @@ services:
 
 volumes:
   cncsearch_data:
-  garminbot_data:
   caddy_data:
   caddy_config:
