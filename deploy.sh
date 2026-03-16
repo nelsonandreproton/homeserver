@@ -47,13 +47,14 @@ _sync .
 _sync ../CNCSearch
 _sync ../GarminBot
 _sync ../HetznerCheck
+_sync ../JMJ2027
 
 echo "[2/3] Rebuilding and restarting all services..."
 docker compose up -d --build
 
 echo "[3/3] Waiting for containers to become healthy..."
 all_ok=true
-for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor; do
+for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027; do
   _wait_healthy "$svc" || all_ok=false
 done
 

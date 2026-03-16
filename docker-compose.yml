@@ -61,6 +61,19 @@ services:
       - /var/log:/var/log:ro                        # auth.log for SSH failure count
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for container list
 
+  # ── JMJ2027 Bot ──────────────────────────────────────────────────────────────
+  jmj2027:
+    build:
+      context: ../JMJ2027
+      dockerfile: Dockerfile
+    container_name: jmj2027
+    restart: unless-stopped
+    env_file: ../JMJ2027/.env
+    environment:
+      - TZ=Europe/Lisbon
+    volumes:
+      - jmj2027_data:/app/data
+
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
     build:
@@ -85,3 +98,4 @@ volumes:
   cncsearch_data:
   caddy_data:
   caddy_config:
+  jmj2027_data:
