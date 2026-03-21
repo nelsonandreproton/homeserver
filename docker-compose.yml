@@ -74,6 +74,19 @@ services:
     volumes:
       - jmj2027_data:/app/data
 
+  # ── Liturgia das Horas Bot ───────────────────────────────────────────────────
+  liturgia-bot:
+    build:
+      context: ../liturgia-das-horas
+      dockerfile: Dockerfile
+    container_name: liturgia-bot
+    restart: unless-stopped
+    env_file: ../liturgia-das-horas/liturgia_bot.env
+    environment:
+      - TZ=Europe/Lisbon
+    volumes:
+      - liturgia_data:/app/data
+
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
     build:
@@ -99,3 +112,4 @@ volumes:
   caddy_data:
   caddy_config:
   jmj2027_data:
+  liturgia_data:
