@@ -60,6 +60,7 @@ services:
       - /:/rootfs:ro                                # host filesystem for disk stats
       - /var/log:/var/log:ro                        # auth.log for SSH failure count
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for container list
+      - /home/garminbot/Obsidian:/obsidian             # Obsidian vault for /xread notes
 
   # ── JMJ2027 Bot ──────────────────────────────────────────────────────────────
   jmj2027:
