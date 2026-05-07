@@ -103,7 +103,7 @@ services:
     expose:
       - "5000"
 
-  # ── PTEvents — Local event alert bot ─────────────────────────────────────────
+  # ── PTEvents — local disruption alerts ──────────────────────────────────────
   ptevents:
     build:
       context: ../PTEvents
@@ -116,6 +116,8 @@ services:
     volumes:
       - ptevents_data:/app/data
       - ../PTEvents/config:/app/config:ro
+    expose:
+      - "8080"
 
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
