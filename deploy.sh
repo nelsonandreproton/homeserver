@@ -12,9 +12,10 @@ cd "$(dirname "$0")"
 # Hard-reset a repo to match the remote (no local changes should live on the server)
 _sync() {
   local dir="$1"
+  local branch="${2:-main}"
   echo "  Syncing $dir..."
   git -C "$dir" fetch origin
-  git -C "$dir" reset --hard origin/main
+  git -C "$dir" reset --hard "origin/$branch"
 }
 
 # Wait up to 60s for a container to be running and healthy (or have no healthcheck)
