@@ -103,6 +103,20 @@ services:
     expose:
       - "5000"
 
+  # ── PTEvents — Local event alert bot ─────────────────────────────────────────
+  ptevents:
+    build:
+      context: ../PTEvents
+      dockerfile: Dockerfile
+    container_name: ptevents
+    restart: unless-stopped
+    env_file: ../PTEvents/.env
+    environment:
+      - TZ=Europe/Lisbon
+    volumes:
+      - ptevents_data:/app/data
+      - ../PTEvents/config:/app/config:ro
+
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
     build:
@@ -130,3 +144,4 @@ volumes:
   jmj2027_data:
   liturgia_data:
   ptsquawk_data:
+  ptevents_data:
