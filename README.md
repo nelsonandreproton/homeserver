@@ -3,6 +3,14 @@
 Orquestrador central de todos os serviços do servidor pessoal.
 Um único `docker-compose.yml` gere tudo; cada repositório mantém o seu próprio `deploy.sh` para atualizações individuais.
 
+## Dashboard
+
+Painel de monitorização em tempo real disponível em:
+**https://nelsonandreproton.github.io/homeserver/**
+
+Mostra PT Storms, PT Squawk e PT Events lado a lado via iframes.
+Servido pela pasta `docs/` via GitHub Pages.
+
 ## Serviços
 
 | Contentor | Repo | Descrição |
@@ -11,6 +19,8 @@ Um único `docker-compose.yml` gere tudo; cada repositório mantém o seu própr
 | `cncsearch_caddy` | — | Reverse proxy com HTTPS automático via sslip.io |
 | `garminbot` | `../GarminBot` | Bot Telegram com dados Garmin, cânticos e estado do servidor |
 | `hetzner-monitor` | `../HetznerCheck` | Monitor de métricas do servidor com alertas e resumo diário |
+| `ptsquawk` | `../PTSquawk` | Monitor de squawk 7700/7600/7500 no espaço aéreo português |
+| `ptevents` | `../PTEvents` | Monitor de eventos disruptivos locais (incêndios, meteorologia, sismos) |
 
 ## Estrutura de diretórios esperada
 
@@ -19,7 +29,9 @@ Um único `docker-compose.yml` gere tudo; cada repositório mantém o seu própr
 ├── homeserver/       ← este repositório
 ├── CNCSearch/
 ├── GarminBot/
-└── HetznerCheck/
+├── HetznerCheck/
+├── PTSquawk/
+└── PTEvents/
 ```
 
 Todos os repositórios devem ser irmãos no mesmo diretório pai.
