@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Server — Dashboard</title>
+  <style>
+    :root {
+      --bg:           #f0f2f5;
+      --surface:      #ffffff;
+      --border:       #d0d7de;
+      --shadow:       0 2px 8px rgba(0,0,0,0.10);
+      --shadow-hover: 0 6px 20px rgba(0,0,0,0.16);
+      --accent:       #1a73e8;
+      --accent-dark:  #1557b0;
+      --text-primary: #1a1a2e;
+      --text-muted:   #57606a;
+      --header-bg:    #1a1a2e;
+      --header-text:  #e6edf3;
+      --header-sub:   #8b949e;
+      --empty-bg:     #f6f8fa;
+      --empty-border: #d0d7de;
+      --tag-bg:       rgba(26,115,232,0.10);
+      --tag-text:     #1557b0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    /* ── Header ── */
+    header {
+      height: 56px;
+      background: var(--header-bg);
+      border-bottom: 1px solid #2d3748;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.30);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .header-icon svg { width: 16px; height: 16px; fill: #fff; }
+
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--header-text);
+      letter-spacing: 0.02em;
+    }
+
+    header span.sub {
+      font-size: 0.8rem;
+      color: var(--header-sub);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #48bb78;
+      animation: pulse 2s infinite;
+    }
+
+    .header-right span {
+      font-size: 0.75rem;
+      color: var(--header-sub);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* ── Main grid ── */
+    main {
+      height: 100vh;
+      padding-top: 56px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 16px;
+      padding-inline: 16px;
+      padding-bottom: 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ── Card header bar ── */
+    .card-header {
+      height: 40px;
+      background: var(--header-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      flex-shrink: 0;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title span.label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--header-text);
+      letter-spacing: 0.03em;
+    }
+
+    .card-title span.tag {
+      font-size: 0.68rem;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid rgba(26,115,232,0.25);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-weight: 500;
+    }
+
+    .card-link {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--header-sub);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    .card-link:hover {
+      color: #a8d4ff;
+      border-color: rgba(168,212,255,0.3);
+      background: rgba(168,212,255,0.08);
+    }
+
+    .card-link svg {
+      width: 11px; height: 11px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── iframe ── */
+    .card iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ── Empty card ── */
+    .card.empty {
+      background: var(--empty-bg);
+      border: 2px dashed var(--empty-border);
+      box-shadow: none;
+    }
+
+    .card.empty:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .empty-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-muted);
+    }
+
+    .empty-body svg {
+      width: 36px; height: 36px;
+      opacity: 0.35;
+    }
+
+    .empty-body p {
+      font-size: 0.85rem;
+      font-style: italic;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    </div>
+    <h1>Home Server</h1>
+    <span class="sub">Live Monitor</span>
+  </div>
+  <div class="header-right">
+    <div class="pulse-dot"></div>
+    <span>live</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Top-left: PT Storms -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="label">⛈ PT Storms</span>
+        <span class="tag">weather</span>
+      </div>
+      <a class="card-link" href="https://nelsonandreproton.github.io/PTStorms/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm-2 16H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h7a2 2 0 002-2v-2h-2v2z"/></svg>
+        open
+      </a>
+    </div>
+    <iframe src="https://nelsonandreproton.github.io/PTStorms/"
+            title="PT Storms"
+            loading="lazy"
+            allowfullscreen></iframe>
+  </div>
+
+  <!-- Top-right: PT Squawk -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="label">✈ PT Squawk</span>
+        <span class="tag">aviation</span>
+      </div>
+      <a class="card-link" href="https://nelsonandreproton.github.io/PTSquawk/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm-2 16H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h7a2 2 0 002-2v-2h-2v2z"/></svg>
+        open
+      </a>
+    </div>
+    <iframe src="https://nelsonandreproton.github.io/PTSquawk/"
+            title="PT Squawk"
+            loading="lazy"
+            allowfullscreen></iframe>
+  </div>
+
+  <!-- Bottom-left: PT Events -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="label">🚨 PT Events</span>
+        <span class="tag">incidents</span>
+      </div>
+      <a class="card-link" href="https://89-167-52-126.sslip.io/ptevents" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm-2 16H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h7a2 2 0 002-2v-2h-2v2z"/></svg>
+        open
+      </a>
+    </div>
+    <iframe src="https://89-167-52-126.sslip.io/ptevents"
+            title="PT Events"
+            loading="lazy"
+            allowfullscreen></iframe>
+  </div>
+
+  <!-- Bottom-right: empty -->
+  <div class="card empty">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="label" style="color: var(--header-sub);">— coming soon</span>
+      </div>
+    </div>
+    <div class="empty-body">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z" opacity="0.3"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" opacity="0"/><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c0-1.1.9 2 2 2V5c0-1.1-.9-2-2-2z" opacity="0"/><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      <p>empty slot</p>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>
