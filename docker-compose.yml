@@ -52,6 +52,7 @@ services:
       CNCSEARCH_JINA_API_KEY: ${JINA_API_KEY}
       HETZNERCHECK_CONFIG_PATH: /hetznercheck/config.yml
       HEALTH_PORT: "8080"
+      PTEVENTS_BASE_URL: "http://localhost:8085"  # ptevents host-bound on 127.0.0.1:8085
     volumes:
       - ../GarminBot/data:/app/data
       - cncsearch_data:/cncsearch_data              # shared DB with cncsearch
@@ -118,6 +119,8 @@ services:
       - ../PTEvents/config:/app/config:ro
     expose:
       - "8080"
+    ports:
+      - "127.0.0.1:8085:8080"  # host-bound for GarminBot (network_mode: host) to reach via localhost:8085
 
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
