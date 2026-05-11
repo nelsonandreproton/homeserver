@@ -75,8 +75,12 @@ services:
     env_file: ../JMJ2027/.env
     environment:
       - TZ=Europe/Lisbon
+      - PYTHONPATH=/hetznercheck
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db
     volumes:
       - jmj2027_data:/app/data
+      - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
 
   # ── Liturgia das Horas Bot ───────────────────────────────────────────────────
   liturgia-bot:
@@ -88,8 +92,12 @@ services:
     env_file: ../liturgia-das-horas/liturgia_bot.env
     environment:
       - TZ=Europe/Lisbon
+      - PYTHONPATH=/hetznercheck
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db
     volumes:
       - liturgia_data:/app/data
+      - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
 
   # ── PTSquawk — Portuguese airspace emergency monitor ─────────────────────────
   ptsquawk:
@@ -101,8 +109,12 @@ services:
     env_file: ../PTSquawk/.env
     environment:
       - TZ=Europe/Lisbon
+      - PYTHONPATH=/hetznercheck
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db
     volumes:
       - ptsquawk_data:/data
+      - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
     expose:
       - "5000"
 
@@ -116,9 +128,13 @@ services:
     env_file: ../PTEvents/.env
     environment:
       - TZ=Europe/Lisbon
+      - PYTHONPATH=/hetznercheck
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db
     volumes:
       - ptevents_data:/app/data
       - ../PTEvents/config:/app/config:ro
+      - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
     expose:
       - "8080"
     ports:
