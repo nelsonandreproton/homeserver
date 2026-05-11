@@ -53,6 +53,7 @@ services:
       HETZNERCHECK_CONFIG_PATH: /hetznercheck/config.yml
       HEALTH_PORT: "8080"
       PTEVENTS_BASE_URL: "http://localhost:8085"  # ptevents host-bound on 127.0.0.1:8085
+      HEARTBEAT_DB: /app/heartbeats/heartbeats.db  # shared liveness DB
     volumes:
       - ../GarminBot/data:/app/data
       - cncsearch_data:/cncsearch_data              # shared DB with cncsearch
@@ -62,6 +63,7 @@ services:
       - /var/log:/var/log:ro                        # auth.log for SSH failure count
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for container list
       - /home/garminbot/Obsidian:/obsidian             # Obsidian vault for /xread notes
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
 
   # ── JMJ2027 Bot ──────────────────────────────────────────────────────────────
   jmj2027:
@@ -136,11 +138,13 @@ services:
     env_file: ../HetznerCheck/.env
     environment:
       - TZ=Europe/Lisbon
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db  # shared liveness DB
     volumes:
       - /:/rootfs:ro
       - /var/log:/var/log:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ../HetznerCheck/config.yml:/app/config.yml:ro
+      - heartbeats_data:/app/heartbeats:ro          # shared liveness DB (read-only)
 
 volumes:
   cncsearch_data:
@@ -150,3 +154,4 @@ volumes:
   liturgia_data:
   ptsquawk_data:
   ptevents_data:
+  heartbeats_data:                                  # bot liveness heartbeats
