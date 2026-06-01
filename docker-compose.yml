@@ -162,6 +162,42 @@ services:
       - ../HetznerCheck/config.yml:/app/config.yml:ro
       - heartbeats_data:/app/heartbeats:ro          # shared liveness DB (read-only)
 
+
+  # ── GitLab MCP gateway — exposes @zereight/mcp-gitlab over HTTP for Notion ───
+  # upstream: internal only; per-request GitLab PAT injected by the gateway.
+  gitlab-mcp-upstream:
+    build:
+      context: ../GitlabMCPServer
+      dockerfile: Dockerfile.upstream
+    container_name: gitlab-mcp-upstream
+    restart: unless-stopped
+    environment:
+      GITLAB_API_URL: "https://np-gitlab.swedencentral.cloudapp.azure.com/api/v4"
+      GITLAB_PERSONAL_ACCESS_TOKEN: "placeholder"  # required at startup; overridden per-request
+      STREAMABLE_HTTP: "true"
+      REMOTE_AUTHORIZATION: "true"
+      HOST: "0.0.0.0"
+      PORT: "3002"
+    expose:
+      - "3002"
+
+  # gateway: Caddy reverse-proxies here; reads ?token= and forwards as Bearer.
+  gitlab-mcp-gateway:
+    build:
+      context: ../GitlabMCPServer
+      dockerfile: Dockerfile
+    container_name: gitlab-mcp-gateway
+    restart: unless-stopped
+    environment:
+      PORT: "8808"
+      UPSTREAM_HOST: "gitlab-mcp-upstream"
+      UPSTREAM_PORT: "3002"
+    expose:
+      - "8808"
+    depends_on:
+      - gitlab-mcp-upstream
+
+
 volumes:
   cncsearch_data:
   caddy_data:
