@@ -192,8 +192,11 @@ services:
       PORT: "8808"
       UPSTREAM_HOST: "gitlab-mcp-upstream"
       UPSTREAM_PORT: "3002"
+      STATS_FILE: "/data/usage-stats.json"
     expose:
       - "8808"
+    volumes:
+      - gitlab_mcp_data:/data
     depends_on:
       - gitlab-mcp-upstream
 
@@ -207,3 +210,4 @@ volumes:
   ptsquawk_data:
   ptevents_data:
   heartbeats_data:                                  # bot liveness heartbeats
+  gitlab_mcp_data:
