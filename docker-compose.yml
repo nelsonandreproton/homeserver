@@ -27,6 +27,7 @@ services:
       CADDY_HOST: ${CADDY_HOST}
     volumes:
       - ../CNCSearch/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /home/garminbot/SpotifyTranscript:/srv/aibrief:ro  # SpotifyTranscript mindmap.html → /aibrief/
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
