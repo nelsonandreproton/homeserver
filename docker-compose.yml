@@ -202,6 +202,37 @@ services:
       - gitlab-mcp-upstream
 
 
+  # ── GarminBot MCP server — read-only analytics over HTTP for Claude ──────────
+  # Separate bridge-network container (NOT host mode) so Caddy reaches it by name.
+  # Same image as garminbot; runs the Streamable HTTP MCP server instead of the bot.
+  # DB mounted read-only; bearer-token auth (GARMIN_MCP_TOKEN supplied via env_file).
+  garminbot-mcp:
+    build:
+      context: ../GarminBot
+      dockerfile: Dockerfile
+    container_name: garminbot-mcp
+    restart: unless-stopped
+    command: ["python", "-m", "src.mcp.server"]
+    env_file: ../GarminBot/.env
+    environment:
+      MCP_TRANSPORT: "http"
+      MCP_PORT: "8000"
+      DATABASE_PATH: /app/data/garmin_data.db
+      # Host header Caddy forwards; must match the public subdomain or DNS-rebinding
+      # protection rejects every request. Override via env if the IP changes.
+      MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-garmin-mcp.${CADDY_HOST}}
+    volumes:
+      - ../GarminBot/data:/app/data:ro
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import glob,sys;sys.exit(0 if any(b'src.mcp.server' in open(p,'rb').read() for p in glob.glob('/proc/*/cmdline')) else 1)"]
+      interval: 60s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+
 volumes:
   cncsearch_data:
   caddy_data:
