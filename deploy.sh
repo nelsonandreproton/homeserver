@@ -57,11 +57,14 @@ _sync ../PTEvents master
 echo "[2/3] Rebuilding and restarting all services..."
 docker compose up -d --build
 
-# Caddyfile is bind-mounted; its container spec is unchanged, so `up -d` does
-# NOT reload it. Reload Caddy explicitly so Caddyfile route changes take effect.
-echo "  Reloading Caddy config..."
-docker compose exec -w /etc/caddy caddy caddy reload --config /etc/caddy/Caddyfile \
-  || echo "  ⚠️  Caddy reload failed — check Caddyfile syntax"
+# The Caddyfile is a single-file bind-mount. `git reset --hard` rewrites it with
+# a new inode, but a running container stays bound to the OLD inode — so neither
+# `up -d` (spec unchanged → not recreated) nor `caddy reload` (reads the stale
+# in-container file) picks up Caddyfile changes. Force-recreate Caddy so it
+# remounts the current file.
+echo "  Recreating Caddy to pick up Caddyfile changes..."
+docker compose up -d --force-recreate caddy \
+  || echo "  ⚠️  Caddy recreate failed — check Caddyfile syntax"
 
 echo "[3/3] Waiting for containers to become healthy..."
 all_ok=true
