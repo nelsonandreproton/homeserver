@@ -57,9 +57,15 @@ _sync ../PTEvents master
 echo "[2/3] Rebuilding and restarting all services..."
 docker compose up -d --build
 
+# Caddyfile is bind-mounted; its container spec is unchanged, so `up -d` does
+# NOT reload it. Reload Caddy explicitly so Caddyfile route changes take effect.
+echo "  Reloading Caddy config..."
+docker compose exec -w /etc/caddy caddy caddy reload --config /etc/caddy/Caddyfile \
+  || echo "  ⚠️  Caddy reload failed — check Caddyfile syntax"
+
 echo "[3/3] Waiting for containers to become healthy..."
 all_ok=true
-for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027 liturgia-bot ptsquawk ptevents; do
+for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027 liturgia-bot ptsquawk ptevents phoenix; do
   _wait_healthy "$svc" || all_ok=false
 done
 

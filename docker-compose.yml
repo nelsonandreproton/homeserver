@@ -233,7 +233,28 @@ services:
       retries: 3
 
 
+  # ── Phoenix — LLM observability backend (OTLP traces + UI) ───────────────────
+  # Single lightweight container (SQLite via PHOENIX_WORKING_DIR), auth enabled.
+  # OTLP HTTP ingest + UI both on 6006; Caddy proxies phoenix.${CADDY_HOST}.
+  # mem_limit keeps it from starving the bots on a small VPS.
+  phoenix:
+    image: arizephoenix/phoenix:version-17.12.0
+    container_name: phoenix
+    restart: unless-stopped
+    environment:
+      PHOENIX_WORKING_DIR: /mnt/data
+      PHOENIX_ENABLE_AUTH: "True"
+      PHOENIX_SECRET: ${PHOENIX_SECRET}
+    volumes:
+      - phoenix_data:/mnt/data
+    expose:
+      - "6006"
+    mem_limit: 1g
+    mem_reservation: 512m
+
+
 volumes:
+  phoenix_data:
   cncsearch_data:
   caddy_data:
   caddy_config:
