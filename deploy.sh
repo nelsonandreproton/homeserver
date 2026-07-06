@@ -66,11 +66,17 @@ echo "  Recreating Caddy to pick up Caddyfile changes..."
 docker compose up -d --force-recreate caddy \
   || echo "  ⚠️  Caddy recreate failed — check Caddyfile syntax"
 
-echo "[3/3] Waiting for containers to become healthy..."
+echo "[3/4] Waiting for containers to become healthy..."
 all_ok=true
 for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027 liturgia-bot ptsquawk ptevents phoenix; do
   _wait_healthy "$svc" || all_ok=false
 done
+
+# Every `--build` leaves cache layers behind; across ~10 services this silently
+# ate 8.7GB over 8 weeks with zero manual pruning. Keep a week of cache for fast
+# incremental rebuilds, drop anything older.
+echo "[4/4] Pruning build cache older than 7 days..."
+docker builder prune -af --filter "until=168h" || echo "  ⚠️  Build cache prune failed"
 
 echo ""
 docker compose ps
