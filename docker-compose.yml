@@ -253,6 +253,25 @@ services:
     mem_reservation: 512m
 
 
+  # ── Nelfoot — online Elifoot clone (FastAPI + SQLite) ────────────────────────
+  # Caddy proxies nelfoot.${CADDY_HOST}. Host-header check must allow the public
+  # subdomain; localhost stays allowed for the container healthcheck.
+  nelfoot:
+    build:
+      context: ../nelfoot
+      dockerfile: Dockerfile
+    container_name: nelfoot
+    restart: unless-stopped
+    env_file: ../nelfoot/.env
+    environment:
+      NELFOOT_ALLOWED_HOSTS: ${NELFOOT_ALLOWED_HOSTS:-nelfoot.${CADDY_HOST},localhost,127.0.0.1}
+    volumes:
+      - nelfoot_data:/data
+    expose:
+      - "8000"
+    mem_limit: 512m
+
+
 volumes:
   phoenix_data:
   cncsearch_data:
@@ -264,3 +283,4 @@ volumes:
   ptevents_data:
   heartbeats_data:                                  # bot liveness heartbeats
   gitlab_mcp_data:
+  nelfoot_data:
