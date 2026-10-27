@@ -271,6 +271,26 @@ services:
       - "8000"
     mem_limit: 512m
 
+  # ── HouseTracker — property auctions in Lisboa/Setúbal ≤ 300k ───────────────
+  housetracker:
+    build:
+      context: ../HouseTracker
+      dockerfile: Dockerfile
+    container_name: housetracker
+    restart: unless-stopped
+    env_file: ../HouseTracker/.env
+    environment:
+      - TZ=Europe/Lisbon
+      - PYTHONPATH=/hetznercheck
+      - HEARTBEAT_DB=/app/heartbeats/heartbeats.db
+    volumes:
+      - housetracker_data:/app/data
+      - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
+      - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
+    expose:
+      - "8080"
+    mem_limit: 256m
+
 
 volumes:
   phoenix_data:
@@ -284,3 +304,4 @@ volumes:
   heartbeats_data:                                  # bot liveness heartbeats
   gitlab_mcp_data:
   nelfoot_data:
+  housetracker_data:
