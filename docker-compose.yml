@@ -34,17 +34,15 @@ services:
       - cncsearch
 
   # ── GarminBot ────────────────────────────────────────────────────────────────
-  # pid:host + network_mode:host so HetznerCheck collectors see real host metrics.
+  # Unprivileged: default bridge network, no host PID/network, no docker.sock, no
+  # host filesystem. /server_status and /container_disk read snapshots that
+  # hetzner-monitor (the only privileged collector) writes to the hetzner_status volume.
   garminbot:
     build:
       context: ../GarminBot
       dockerfile: Dockerfile
     container_name: garminbot
     restart: unless-stopped
-    pid: "host"             # real process/zombie count for /server_status
-    network_mode: "host"    # real network stats; GarminBot only needs internet access
-    group_add:
-      - "${DOCKER_GID:-999}"  # docker group GID for socket access (getent group docker)
     env_file: ../GarminBot/.env
     environment:
       PYTHONPATH: /cncsearch:/hetznercheck
@@ -52,19 +50,25 @@ services:
       CNCSEARCH_EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-jina}
       CNCSEARCH_JINA_API_KEY: ${JINA_API_KEY}
       HETZNERCHECK_CONFIG_PATH: /hetznercheck/config.yml
-      HEALTH_PORT: "8080"
-      PTEVENTS_BASE_URL: "http://localhost:8085"  # ptevents host-bound on 127.0.0.1:8085
+      HETZNERCHECK_STATUS_DIR: /hetznerstatus       # snapshots written by hetzner-monitor
+      HEALTH_PORT: "8080"                           # container-internal only (expose, not published)
+      PTEVENTS_BASE_URL: "http://ptevents:8080"     # compose network
+      GARMIN_API_HOST: "0.0.0.0"                    # bind inside the container; published to host loopback below
       HEARTBEAT_DB: /app/heartbeats/heartbeats.db  # shared liveness DB
     volumes:
       - ../GarminBot/data:/app/data
       - cncsearch_data:/cncsearch_data              # shared DB with cncsearch
       - ../CNCSearch:/cncsearch:ro                  # /canticos handler source
       - ../HetznerCheck:/hetznercheck:ro            # /server_status handler source
-      - /:/rootfs:ro                                # host filesystem for disk stats
-      - /var/log:/var/log:ro                        # auth.log for SSH failure count
-      - /var/run/docker.sock:/var/run/docker.sock:ro  # Docker API for container list
+      - hetzner_status:/hetznerstatus:ro            # metrics snapshots (read-only)
       - /home/garminbot/Obsidian:/obsidian             # Obsidian vault for /xread notes
       - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
+    expose:
+      - "8080"
+    ports:
+      # Internal data API (only started if GARMIN_API_PORT=8765 is set in the service env file).
+      # Host-loopback-only: NOT reachable from the internet.
+      - "127.0.0.1:8765:8765"
 
   # ── JMJ2027 Bot ──────────────────────────────────────────────────────────────
   jmj2027:
@@ -137,9 +141,7 @@ services:
       - ../HetznerCheck:/hetznercheck:ro            # heartbeat module
       - heartbeats_data:/app/heartbeats             # shared liveness DB (read/write)
     expose:
-      - "8080"
-    ports:
-      - "127.0.0.1:8085:8080"  # host-bound for GarminBot (network_mode: host) to reach via localhost:8085
+      - "8080"                 # reached by garminbot at http://ptevents:8080 (compose network)
 
   # ── HetznerCheck monitor ─────────────────────────────────────────────────────
   hetzner-monitor:
@@ -150,11 +152,23 @@ services:
     restart: unless-stopped
     pid: "host"
     network_mode: "host"
+    # Runs as root on purpose: /container_disk walks /var/lib/docker/overlay2 (root-only),
+    # and docker.sock access is root-equivalent anyway, so a non-root uid adds no real
+    # isolation. Hardening is via dropped capabilities instead.
+    user: "0:0"
     group_add:
       - "${DOCKER_GID:-999}"  # docker group GID for socket access
+      - "4"                   # adm: read /var/log/auth.log
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_READ_SEARCH       # read container overlay dirs owned by other uids (disk stats)
+    security_opt:
+      - no-new-privileges:true
     env_file: ../HetznerCheck/.env
     environment:
       - TZ=Europe/Lisbon
+      - STATUS_DIR=/app/status                      # writes metrics.json / container_disk.json
       - HEARTBEAT_DB=/app/heartbeats/heartbeats.db  # shared liveness DB
     volumes:
       - /:/rootfs:ro
@@ -162,6 +176,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ../HetznerCheck/config.yml:/app/config.yml:ro
       - heartbeats_data:/app/heartbeats:ro          # shared liveness DB (read-only)
+      - hetzner_status:/app/status                  # snapshots for garminbot (read/write)
 
 
   # ── GitLab MCP gateway — exposes @zereight/mcp-gitlab over HTTP for Notion ───
@@ -302,6 +317,7 @@ volumes:
   ptsquawk_data:
   ptevents_data:
   heartbeats_data:                                  # bot liveness heartbeats
+  hetzner_status:                                   # hetzner-monitor snapshots -> garminbot
   gitlab_mcp_data:
   nelfoot_data:
   housetracker_data:
