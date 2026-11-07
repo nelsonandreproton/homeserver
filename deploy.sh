@@ -70,7 +70,7 @@ docker compose up -d --force-recreate caddy \
 
 echo "[3/4] Waiting for containers to become healthy..."
 all_ok=true
-for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027 liturgia-bot ptsquawk ptevents phoenix nelfoot housetracker; do
+for svc in cncsearch cncsearch_caddy garminbot hetzner-monitor jmj2027 liturgia-bot ptsquawk ptevents nelfoot housetracker; do
   _wait_healthy "$svc" || all_ok=false
 done
 
