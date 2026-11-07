@@ -181,7 +181,10 @@ services:
 
   # ── GitLab MCP gateway — exposes @zereight/mcp-gitlab over HTTP for Notion ───
   # upstream: internal only; per-request GitLab PAT injected by the gateway.
+  # DISABLED 2026-11-07: unused since 2026-06-08 and it forwards to the company
+  # GitLab. To re-enable: remove both `profiles:` lines below, push, run deploy.sh.
   gitlab-mcp-upstream:
+    profiles: ["disabled"]
     build:
       context: ../GitlabMCPServer
       dockerfile: Dockerfile.upstream
@@ -199,6 +202,7 @@ services:
 
   # gateway: Caddy reverse-proxies here; reads ?token= and forwards as Bearer.
   gitlab-mcp-gateway:
+    profiles: ["disabled"]
     build:
       context: ../GitlabMCPServer
       dockerfile: Dockerfile
