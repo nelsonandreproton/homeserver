@@ -126,7 +126,8 @@ services:
   # ── PTEvents — local disruption alerts ──────────────────────────────────────
   # DISABLED 2026-11-09: turned off on request (noisy, transit providers blocked).
   # Data volume kept. To re-enable: remove the `profiles:` line below, add
-  # ptevents back to deploy.sh's health loop, push, run deploy.sh.
+  # ptevents back to deploy.sh's health loop, drop it from HetznerCheck's
+  # ignore_containers, push, run deploy.sh.
   ptevents:
     profiles: ["disabled"]
     build:
